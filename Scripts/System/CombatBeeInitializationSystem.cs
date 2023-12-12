@@ -44,7 +44,7 @@ namespace CombatBee
             minBeeSize = config.minBeeSize;
             colorZero = config.teamColorZero;
             colorOne = config.teamColorOne;
-            CombatBeeSpawnerClass.Init(BeePrefab, config.ParticlePrefab, minBeeSize,maxBeeSize,colorZero, colorOne);
+            //CombatBeeSpawnerClass.Init(BeePrefab, config.ParticlePrefab, minBeeSize,maxBeeSize,colorZero, colorOne);
 
             /*// initializing grid info and stack heights
             var entityForGridInfo = state.EntityManager.CreateEntity();

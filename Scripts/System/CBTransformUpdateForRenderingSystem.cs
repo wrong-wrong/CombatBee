@@ -37,6 +37,13 @@ namespace CombatBee
             }.ScheduleParallel(state.Dependency);
 
             state.Dependency = new BeeTransformUpdateJob { }.ScheduleParallel(state.Dependency);    
+/*            var beeDeadLookup = SystemAPI.GetComponentLookup<BeeDead>(true);
+            state.Dependency = new BeeTransformUpdateJob
+            {
+                beeDeadLookup = beeDeadLookup,
+                up = up,
+                speedStretch = speedStretch,
+            }.ScheduleParallel(state.Dependency);*/
         }
     }
 
@@ -71,9 +78,40 @@ namespace CombatBee
     [BurstCompile]
     public partial struct BeeTransformUpdateJob : IJobEntity
     {
-        public void Execute(ref LocalTransform localTransform, in BeePosition beePositon)
+        public void Execute(ref LocalTransform localTransform, in BeePosition beePosition)
         {
-            localTransform.Position = beePositon.position;
+            localTransform.Position = beePosition.position;
         }
     }
+
+    /*    [WithDisabled(typeof(IsInPoolCB))]
+        [BurstCompile]
+        public partial struct BeeTransformUpdateJob : IJobEntity
+        {
+            public float3 up;
+            public float speedStretch;
+            [ReadOnly]
+            public ComponentLookup<BeeDead> beeDeadLookup;  //because BeeDead is an enableableComponent, useing in parameter of Execute will filter out entities with disabled BeeDead
+            public void Execute(Entity entity, ref LocalToWorld localToWorld, in BeeVelocity beeVelocity, in BeeSmoothMovement beeSmoothMovement, in BeeSize beeSize)
+            {
+                var scale = new float3(beeSize.size, beeSize.size, beeSize.size);
+                if(beeDeadLookup.IsComponentEnabled(entity) == false)
+                {
+                    var magnitude = math.sqrt(beeVelocity.velocity.x * beeVelocity.velocity.x + beeVelocity.velocity.y * beeVelocity.velocity.y + beeVelocity.velocity.z * beeVelocity.velocity.z);
+                    float stretch = math.max(1f, magnitude * speedStretch);
+                    scale.z *= stretch;
+                    scale.x /= (stretch - 1f) / 5f + 1f;
+                    scale.y /= (stretch - 1f) / 5f + 1f;
+                }
+                else
+                {
+                    scale *= beeDeadLookup[entity].deathTimer;
+                }
+
+                quaternion tarQuaternion = quaternion.identity;
+                tarQuaternion = quaternion.LookRotationSafe(beeSmoothMovement.smoothDirection,up);
+                localToWorld.Value = float4x4.TRS(beeSmoothMovement.smoothPosition, tarQuaternion, scale);
+
+            }
+        }*/
 }

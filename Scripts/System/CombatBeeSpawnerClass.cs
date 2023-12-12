@@ -1,4 +1,4 @@
-using Unity.Burst;
+/*using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -46,7 +46,9 @@ namespace CombatBee
                     //bee = ecb.Instantiate(BeePrefab);
                 }
                 state.EntityManager.SetComponentData(bee, new BeeResourceTarget { resource = Entity.Null });
-                state.EntityManager.SetComponentData(bee, new LocalTransform { Position = pos, Rotation = quaternion.identity, Scale = Random.Range(minBeeSize, maxBeeSize) });
+                var size = Random.Range(minBeeSize, maxBeeSize);
+                state.EntityManager.SetComponentData(bee, new BeeSize { size = size });
+                state.EntityManager.SetComponentData(bee, new LocalTransform { Position = pos, Rotation = quaternion.identity, Scale = size });
                 state.EntityManager.SetComponentData(bee, new BeeDead { deathTimer = 1f });
                 //state.EntityManager.SetSharedComponent(bee, new TeamCB { teamID = teamID });
                 //ecb.SetComponent(bee, new LocalTransform { Position = pos, Rotation = quaternion.identity, Scale = Random.Range(minBeeSize, maxBeeSize) });
@@ -106,4 +108,4 @@ namespace CombatBee
         }
 
     }
-}
+}*/

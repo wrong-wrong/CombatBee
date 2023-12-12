@@ -13,7 +13,10 @@ namespace CombatBee
     { 
         public float3 velocity;
     }
-
+    public struct BeeSize : IComponentData 
+    {
+        public float size;
+    }
     public struct BeePosition : IComponentData
     {
         public float3 position;
@@ -59,8 +62,8 @@ namespace CombatBee
                 AddComponent<TeamCB>(entity);
                 AddComponent<BeeVelocity>(entity);
                 AddComponent<BeePosition>(entity);
-                AddComponent<BeeSmoothMovement>(entity);
-                
+                AddComponent(entity, new BeeSmoothMovement { smoothDirection = float3.zero, smoothPosition = float3.zero });
+                AddComponent<BeeSize>(entity);
                 AddComponent<IsInPoolCB>(entity);
                 AddComponent(entity, new BeeEnemyTarget { enemy = Entity.Null });
                 AddComponent(entity, new BeeResourceTarget { resource = Entity.Null });
