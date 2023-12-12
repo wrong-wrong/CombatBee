@@ -3,6 +3,10 @@ using Unity.Entities;
 
 namespace CombatBee
 {
+    public struct ShouldBeRecycledToPoolCB : IComponentData, IEnableableComponent
+    {
+
+    }
     public struct IsInPoolCB : IComponentData, IEnableableComponent
     {
 

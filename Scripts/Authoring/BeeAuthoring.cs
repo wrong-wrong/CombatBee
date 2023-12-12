@@ -71,6 +71,8 @@ namespace CombatBee
                 AddComponent<BeeStateAttacking>(entity);
                 AddComponent(entity, new BeeDead { deathTimer = 1f });
                 AddComponent<URPMaterialPropertyBaseColor>(entity);
+                AddComponent<ShouldBeRecycledToPoolCB>(entity);
+                SetComponentEnabled<ShouldBeRecycledToPoolCB>(entity, false);
                 SetComponentEnabled<BeeStateAttacking>(entity, false);
                 SetComponentEnabled<BeeStateHoldingResource>(entity, false);
                 SetComponentEnabled<BeeEnemyTarget>(entity, false);

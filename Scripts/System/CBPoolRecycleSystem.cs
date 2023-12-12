@@ -36,14 +36,15 @@ namespace CombatBee
             }
 
             foreach(var (localTransform, entity) in SystemAPI.Query<RefRW<LocalTransform>>() // bees who enabled isInPool & disabled Beedead   ,should be changed into enabled BeeDead
-                .WithDisabled<BeeDead>()
-                .WithAll<IsInPoolCB>()
+                .WithDisabled<IsInPoolCB>()
+                .WithAll<ShouldBeRecycledToPoolCB>()
                 .WithEntityAccess())
             {
                 localTransform.ValueRW.Position = PoolPosition;
                 beePool.ValueRW.pool.Enqueue(entity);
-                state.EntityManager.SetComponentEnabled<BeeDead>(entity, true);
-
+                //state.EntityManager.SetComponentEnabled<BeeDead>(entity, true);
+                state.EntityManager.SetComponentEnabled<IsInPoolCB>(entity, true);
+                state.EntityManager.SetComponentEnabled<ShouldBeRecycledToPoolCB>(entity, false);
                 state.EntityManager.SetComponentEnabled<BeeEnemyTarget>(entity, false);
                 state.EntityManager.SetComponentEnabled<BeeResourceTarget>(entity, false);
                 state.EntityManager.SetComponentEnabled<BeeStateAttacking>(entity, false);

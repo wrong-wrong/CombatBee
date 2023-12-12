@@ -100,8 +100,9 @@ namespace CombatBee
                 beeVelCom.ValueRW.velocity += gravity * deltaTime;
                 if ((beeDeadCom.ValueRW.deathTimer -= deltaTime / 3f) < 0f)
                 {
-                    state.EntityManager.SetComponentEnabled<BeeDead>(entity, false);
-                    state.EntityManager.SetComponentEnabled<IsInPoolCB>(entity, true);
+                    state.EntityManager.SetComponentEnabled<ShouldBeRecycledToPoolCB>(entity, true);
+                    //state.EntityManager.SetComponentEnabled<BeeDead>(entity, false);
+                    //state.EntityManager.SetComponentEnabled<IsInPoolCB>(entity, true);
                 }
             }
 
@@ -463,72 +464,75 @@ namespace CombatBee
                 beeResTargetLookup.SetComponentEnabled(entity, false);
                 return;
             }
-            if(res != Entity.Null)
-            { 
-                //var res = resTargetCom.resource;
-                if (resIsCarriedLookup.IsComponentEnabled(res)) // held by someone
+            if(res == Entity.Null)
+            {
+                beeResTargetLookup.SetComponentEnabled(entity, false);
+                return;
+            }
+            
+            //var res = resTargetCom.resource;
+            if (resIsCarriedLookup.IsComponentEnabled(res)) // held by someone
+            {
+                var resIsCarriedCom = resIsCarriedLookup[res];
+                if (resIsCarriedCom.holderBeeTeamId == teamCom.teamID)
                 {
-                    var resIsCarriedCom = resIsCarriedLookup[res];
-                    if (resIsCarriedCom.holderBeeTeamId == teamCom.teamID)
-                    {
-                        //ecb.SetComponentEnabled<BeeResourceTarget>(0,entity, false);
-                        beeResTargetLookup.SetComponentEnabled(entity, false);
-                    }
-                    else
-                    {
-                        beeEnemyTarLookup[entity] = new BeeEnemyTarget { enemy = resIsCarriedCom.Bee };
-                        beeEnemyTarLookup.SetComponentEnabled(entity, true);
-                        //ecb.SetComponentEnabled<BeeEnemyTarget>(0,entity, true);
-                    }
+                    //ecb.SetComponentEnabled<BeeResourceTarget>(0,entity, false);
+                    beeResTargetLookup.SetComponentEnabled(entity, false);
                 }
                 else
                 {
-                    //try figure out if is topOfStack
-                    var gridCoor = resGridCoordinateLookup[res];
-                    var idx = gridCoor.gridX + gridCoor.gridY * GridXCount;
-                    var stackHeight = stackHeightsLookup[idx];
-
-                    var resStackCom = resStackLookup[res];
-                    if (resStackCom.stacked && resStackCom.stackIndex != stackHeight.stackHeight - 1)//not top of stack
-                    {
-                        beeResTargetLookup.SetComponentEnabled(entity, false);
-                        //ecb.SetComponentEnabled<BeeResourceTarget>(0, entity, false);
-                    }
-                    else
-                    {
-                        var targetPos = localTransformLookup[res].Position;
-                        var delta = targetPos - beePositionCom.position;
-                        var squaredDist = delta.x*delta.x + delta.y*delta.y + delta.z * delta.z;
-                        if(squaredDist > grabDistanceSqr)
-                        {
-                            velocityCom.velocity += delta * (chaseForce * deltaTime / math.sqrt(squaredDist));
-                        }
-                        else
-                        {
-                            //GrabResource
-                            //update bee
-                            //ecb.SetComponentEnabled<BeeStateHoldingResource>(0, entity, true);
-                            stateHoldingLookup.SetComponentEnabled(entity, true);
-                            //update stackHeight
-                            stackHeight.stackHeight -= 1;
-                            stackHeightsLookup[idx] = stackHeight;
-                            //update resource
-                            resStackLookup[res] = new ResStackCB { stacked = false, stackIndex = 0 };
-                            resIsCarriedLookup[res] = new ResIsCarriedCB { Bee = entity, holderBeeTeamId = teamCom.teamID };
-                            resIsCarriedLookup.SetComponentEnabled(res, true);
-                            //ecb.SetComponentEnabled<ResStackCB>(0, res, false);
-                            resStackLookup.SetComponentEnabled(res, false);
-                            //ecb.SetComponentEnabled<ResWaitToCheck>(0, res, true);
-                            waitToCheckLookup.SetComponentEnabled(res, true);
-                        }
-                    }
+                    beeEnemyTarLookup[entity] = new BeeEnemyTarget { enemy = resIsCarriedCom.Bee };
+                    beeEnemyTarLookup.SetComponentEnabled(entity, true);
+                    //ecb.SetComponentEnabled<BeeEnemyTarget>(0,entity, true);
                 }
             }
             else
             {
-                //ecb.SetComponentEnabled<BeeResourceTarget>(0, entity, false);
-                beeResTargetLookup.SetComponentEnabled(entity, false);
+                //try figure out if is topOfStack
+                var gridCoor = resGridCoordinateLookup[res];
+                var idx = gridCoor.gridX + gridCoor.gridY * GridXCount;
+                var stackHeight = stackHeightsLookup[idx];
+
+                var resStackCom = resStackLookup[res];
+                if (resStackCom.stacked && resStackCom.stackIndex != stackHeight.stackHeight - 1)//not top of stack
+                {
+                    beeResTargetLookup.SetComponentEnabled(entity, false);
+                    //ecb.SetComponentEnabled<BeeResourceTarget>(0, entity, false);
+                }
+                else
+                {
+                    var targetPos = localTransformLookup[res].Position;
+                    var delta = targetPos - beePositionCom.position;
+                    var squaredDist = delta.x*delta.x + delta.y*delta.y + delta.z * delta.z;
+                    if(squaredDist > grabDistanceSqr)
+                    {
+                        velocityCom.velocity += delta * (chaseForce * deltaTime / math.sqrt(squaredDist));
+                    }
+                    else
+                    {
+                        //GrabResource
+                        //update bee
+                        //ecb.SetComponentEnabled<BeeStateHoldingResource>(0, entity, true);
+                        stateHoldingLookup.SetComponentEnabled(entity, true);
+                        //update stackHeight
+                        stackHeight.stackHeight -= 1;
+                        stackHeightsLookup[idx] = stackHeight;
+                        //update resource
+                        resStackLookup[res] = new ResStackCB { stacked = false, stackIndex = 0 };
+                        resIsCarriedLookup[res] = new ResIsCarriedCB { Bee = entity, holderBeeTeamId = teamCom.teamID };
+                        resIsCarriedLookup.SetComponentEnabled(res, true);
+                        //ecb.SetComponentEnabled<ResStackCB>(0, res, false);
+                        resStackLookup.SetComponentEnabled(res, false);
+                        //ecb.SetComponentEnabled<ResWaitToCheck>(0, res, true);
+                        waitToCheckLookup.SetComponentEnabled(res, true);
+                    }
+                }
             }
+            
+            
+            
+                //ecb.SetComponentEnabled<BeeResourceTarget>(0, entity, false);
+            
         }
 /*        int GridPosToIdx(int gridX, int gridY)
         {
